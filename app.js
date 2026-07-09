@@ -87,6 +87,7 @@ const closeModalBtn = document.getElementById('close-modal-btn');
 const copyCodeBtn = document.getElementById('copy-code-btn');
 const winnersCount = document.getElementById('winners-count');
 const confettiEl = document.getElementById('confetti');
+const lotterySection = document.getElementById('lottery-section');
 
 const ctx = wheelCanvas.getContext('2d');
 
@@ -96,6 +97,43 @@ function init() {
   drawWheel();
   animateWinnersCount();
   bindEvents();
+  initScrollAnimations();
+  lotterySection.classList.add('is-visible');
+}
+
+function initScrollAnimations() {
+  const sections = document.querySelectorAll('.animate-section');
+  const steps = document.querySelectorAll('.steps__list li');
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('is-visible');
+
+        if (entry.target.classList.contains('deals')) {
+          entry.target.querySelectorAll('.deal-card').forEach((card, i) => {
+            card.style.transitionDelay = `${i * 0.08}s`;
+            card.classList.add('is-visible');
+          });
+        }
+
+        if (entry.target.classList.contains('steps')) {
+          steps.forEach((step, i) => {
+            step.style.transitionDelay = `${i * 0.12}s`;
+            step.classList.add('is-visible');
+          });
+        }
+
+        observer.unobserve(entry.target);
+      });
+    },
+    { threshold: 0.15, rootMargin: '0px 0px -40px 0px' }
+  );
+
+  sections.forEach((section) => {
+    if (section.id !== 'lottery-section') observer.observe(section);
+  });
 }
 
 function formatPrice(amount) {
@@ -238,10 +276,15 @@ function handlePhoneSubmit(e) {
   userPhone = '+254 ' + formatted;
   userPhoneDisplay.textContent = userPhone;
 
-  phoneForm.classList.add('hidden');
-  wheelArea.classList.remove('hidden');
-
-  wheelArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  phoneForm.classList.add('is-exiting');
+  setTimeout(() => {
+    phoneForm.classList.add('hidden');
+    phoneForm.classList.remove('is-exiting');
+    wheelArea.classList.remove('hidden');
+    wheelArea.classList.add('is-revealed');
+    wheelCanvas.classList.add('is-idle');
+    wheelArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 380);
 }
 
 // ─── Spin logic ───────────────────────────────────────────────────────────────
@@ -270,6 +313,8 @@ function handleSpin() {
 
   isSpinning = true;
   spinBtn.disabled = true;
+  spinBtn.classList.add('is-spinning');
+  wheelCanvas.classList.remove('is-idle');
   spinBtn.querySelector('.spin-btn__text').textContent = 'SPINNING...';
 
   const { prize, index } = pickPrize();

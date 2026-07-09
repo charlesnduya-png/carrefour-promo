@@ -30,40 +30,15 @@
   </header>
 
   <main>
-    <!-- Hero -->
-    <section class="hero">
-      <div class="hero__tag">Limited Time Offer</div>
-      <h1>Shop Smart.<br /><span class="highlight">Win Big.</span></h1>
-      <p class="hero__sub">Enter your number, spin the wheel, and unlock exclusive Carrefour rewards — plus today's hottest deals.</p>
-      <div class="hero__stats">
-        <div class="stat">
-          <strong id="winners-count">2,847</strong>
-          <span>Winners today</span>
-        </div>
-        <div class="stat">
-          <strong>48h</strong>
-          <span>Left to claim</span>
-        </div>
-        <div class="stat">
-          <strong>100%</strong>
-          <span>Everyone wins</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Hot Deals -->
-    <section class="deals" aria-labelledby="deals-title">
-      <div class="section-head">
-        <h2 id="deals-title">Today's Hot Deals</h2>
-        <span class="section-head__tag">Up to 50% OFF</span>
-      </div>
-      <div class="deals__grid" id="deals-grid"></div>
-    </section>
-
-    <!-- Phone + Lottery -->
-    <section class="lottery-section" id="lottery-section">
+    <!-- Spin & Win — Primary CTA -->
+    <section class="lottery-section animate-section" id="lottery-section">
       <div class="lottery-card">
+        <div class="lottery-card__glow" aria-hidden="true"></div>
+        <div class="lottery-card__sparkles" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
         <div class="lottery-card__header">
+          <div class="lottery-card__badge">🎁 Instant Rewards</div>
           <h2>Spin & Win</h2>
           <p>Enter your phone number to unlock your prize wheel</p>
         </div>
@@ -85,7 +60,7 @@
             />
           </div>
           <p class="form-hint" id="phone-hint">We'll send your reward details via WhatsApp</p>
-          <button type="submit" class="btn btn--primary btn--full" id="unlock-btn">
+          <button type="submit" class="btn btn--primary btn--full btn--shine" id="unlock-btn">
             <span>Unlock My Spin</span>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
@@ -96,6 +71,7 @@
           <p class="wheel-greeting">Good luck, <strong id="user-phone-display"></strong>!</p>
 
           <div class="wheel-container">
+            <div class="wheel-ring" aria-hidden="true"></div>
             <div class="wheel-pointer" aria-hidden="true"></div>
             <canvas id="wheel-canvas" width="300" height="300" role="img" aria-label="Prize wheel"></canvas>
           </div>
@@ -108,8 +84,38 @@
       </div>
     </section>
 
+    <!-- Hero -->
+    <section class="hero animate-section">
+      <div class="hero__tag">Limited Time Offer</div>
+      <h1>Shop Smart.<br /><span class="highlight">Win Big.</span></h1>
+      <p class="hero__sub">Exclusive Carrefour rewards plus today's hottest deals — everyone wins!</p>
+      <div class="hero__stats">
+        <div class="stat">
+          <strong id="winners-count">2,847</strong>
+          <span>Winners today</span>
+        </div>
+        <div class="stat">
+          <strong>48h</strong>
+          <span>Left to claim</span>
+        </div>
+        <div class="stat">
+          <strong>100%</strong>
+          <span>Everyone wins</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Hot Deals -->
+    <section class="deals animate-section" aria-labelledby="deals-title">
+      <div class="section-head">
+        <h2 id="deals-title">Today's Hot Deals</h2>
+        <span class="section-head__tag">Up to 50% OFF</span>
+      </div>
+      <div class="deals__grid" id="deals-grid"></div>
+    </section>
+
     <!-- How it works -->
-    <section class="steps" aria-labelledby="steps-title">
+    <section class="steps animate-section" aria-labelledby="steps-title">
       <h2 id="steps-title">How It Works</h2>
       <ol class="steps__list">
         <li>

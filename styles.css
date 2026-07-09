@@ -28,6 +28,15 @@ html {
   scroll-behavior: smooth;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 body {
   font-family: 'DM Sans', system-ui, sans-serif;
   background: var(--bg);
@@ -56,6 +65,12 @@ body {
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
+  animation: headerSlideDown 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes headerSlideDown {
+  from { opacity: 0; transform: translateY(-100%); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .header__inner {
@@ -136,13 +151,27 @@ main {
   z-index: 1;
   max-width: 480px;
   margin: 0 auto;
-  padding: 0 20px 40px;
+  padding: 16px 20px 40px;
+}
+
+/* Scroll reveal */
+.animate-section {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.animate-section.is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* Hero */
 .hero {
-  padding: 28px 0 24px;
+  padding: 24px 0;
   text-align: center;
+  margin-bottom: 8px;
 }
 
 .hero__tag {
@@ -156,6 +185,12 @@ main {
   padding: 6px 14px;
   border-radius: 20px;
   margin-bottom: 16px;
+  animation: tagPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
+}
+
+@keyframes tagPop {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 .hero h1 {
@@ -171,6 +206,13 @@ main {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  background-size: 200% auto;
+  animation: shimmerText 4s ease-in-out infinite;
+}
+
+@keyframes shimmerText {
+  0%, 100% { background-position: 0% center; }
+  50% { background-position: 100% center; }
 }
 
 .hero__sub {
@@ -192,12 +234,19 @@ main {
   border-radius: var(--radius-sm);
   padding: 12px 8px;
   box-shadow: var(--shadow);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+}
+
+.stat:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
 }
 
 .stat strong {
   display: block;
   font-size: 1.1rem;
   color: var(--carrefour-blue);
+  font-variant-numeric: tabular-nums;
 }
 
 .stat span {
@@ -247,12 +296,23 @@ main {
   overflow: hidden;
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
+  opacity: 0;
+  transform: translateY(20px) scale(0.97);
+}
+
+.deal-card.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
 }
 
 .deal-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px) scale(1.02);
   box-shadow: var(--shadow-lg);
+}
+
+.deal-card:active {
+  transform: translateY(-1px) scale(1);
 }
 
 .deal-card__img {
@@ -312,22 +372,129 @@ main {
 
 /* Lottery */
 .lottery-section {
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
 .lottery-card {
+  position: relative;
   background: var(--surface);
-  border-radius: 20px;
-  border: 2px solid var(--carrefour-blue);
+  border-radius: 24px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
   box-shadow: var(--shadow-lg);
   overflow: hidden;
+  animation: cardEntrance 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both,
+             cardFloat 6s ease-in-out 1s infinite;
+}
+
+.lottery-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+  padding: 2px;
+  background: linear-gradient(135deg, var(--carrefour-blue), var(--carrefour-red), var(--gold), var(--carrefour-blue));
+  background-size: 300% 300%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: borderGlow 4s ease infinite;
+  pointer-events: none;
+}
+
+.lottery-card__glow {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(0, 78, 159, 0.08) 0%, transparent 50%);
+  animation: glowRotate 8s linear infinite;
+  pointer-events: none;
+}
+
+.lottery-card__sparkles span {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: var(--gold);
+  border-radius: 50%;
+  opacity: 0;
+  animation: sparkle 3s ease-in-out infinite;
+}
+
+.lottery-card__sparkles span:nth-child(1) { top: 15%; left: 10%; animation-delay: 0s; }
+.lottery-card__sparkles span:nth-child(2) { top: 25%; right: 12%; animation-delay: 0.6s; }
+.lottery-card__sparkles span:nth-child(3) { bottom: 30%; left: 8%; animation-delay: 1.2s; }
+.lottery-card__sparkles span:nth-child(4) { top: 60%; right: 8%; animation-delay: 1.8s; }
+.lottery-card__sparkles span:nth-child(5) { bottom: 15%; right: 25%; animation-delay: 2.4s; }
+
+@keyframes cardEntrance {
+  from { opacity: 0; transform: translateY(32px) scale(0.94); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes cardFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes borderGlow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes glowRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0; transform: scale(0); }
+  50% { opacity: 1; transform: scale(1.5); }
 }
 
 .lottery-card__header {
+  position: relative;
   background: linear-gradient(135deg, var(--carrefour-blue), var(--carrefour-blue-dark));
   color: white;
-  padding: 20px;
+  padding: 24px 20px;
   text-align: center;
+  overflow: hidden;
+}
+
+.lottery-card__header::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+  animation: headerShine 3s ease-in-out infinite;
+}
+
+@keyframes headerShine {
+  0% { left: -100%; }
+  50%, 100% { left: 150%; }
+}
+
+.lottery-card__badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(4px);
+  padding: 5px 12px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+  animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
 }
 
 .lottery-card__header h2 {
@@ -359,11 +526,13 @@ main {
   border-radius: var(--radius-sm);
   overflow: hidden;
   margin-bottom: 8px;
-  transition: border-color 0.2s;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
 }
 
 .phone-input-wrap:focus-within {
   border-color: var(--carrefour-blue);
+  box-shadow: 0 0 0 4px rgba(0, 78, 159, 0.12);
+  transform: scale(1.01);
 }
 
 .phone-prefix {
@@ -407,9 +576,29 @@ main {
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.2s ease,
+              opacity 0.15s;
   text-decoration: none;
   padding: 14px 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn--shine::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  animation: btnShine 2.5s ease-in-out infinite;
+}
+
+@keyframes btnShine {
+  0% { left: -100%; }
+  50%, 100% { left: 150%; }
 }
 
 .btn:active:not(:disabled) {
@@ -433,6 +622,7 @@ main {
 
 .btn--primary:hover:not(:disabled) {
   box-shadow: 0 6px 24px rgba(0, 78, 159, 0.45);
+  transform: translateY(-2px);
 }
 
 .btn--spin {
@@ -441,12 +631,21 @@ main {
   font-size: 1.1rem;
   padding: 18px;
   box-shadow: 0 4px 20px rgba(229, 0, 43, 0.4);
-  animation: glow 2s ease-in-out infinite;
+  animation: spinBtnPulse 2s ease-in-out infinite;
 }
 
-@keyframes glow {
+.btn--spin:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.02);
+}
+
+@keyframes spinBtnPulse {
   0%, 100% { box-shadow: 0 4px 20px rgba(229, 0, 43, 0.4); }
-  50% { box-shadow: 0 4px 32px rgba(229, 0, 43, 0.65); }
+  50% { box-shadow: 0 6px 36px rgba(229, 0, 43, 0.65), 0 0 0 8px rgba(229, 0, 43, 0.1); }
+}
+
+.btn--spin.is-spinning {
+  animation: none;
+  transform: scale(0.98);
 }
 
 .btn--whatsapp {
@@ -471,6 +670,23 @@ main {
   text-align: center;
 }
 
+.wheel-area.is-revealed {
+  animation: wheelReveal 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes wheelReveal {
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.phone-form.is-exiting {
+  animation: formExit 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes formExit {
+  to { opacity: 0; transform: translateY(-12px) scale(0.97); }
+}
+
 .wheel-greeting {
   font-size: 0.9rem;
   margin-bottom: 16px;
@@ -488,6 +704,19 @@ main {
   margin: 0 auto 20px;
 }
 
+.wheel-ring {
+  position: absolute;
+  inset: -12px;
+  border-radius: 50%;
+  border: 3px dashed rgba(0, 78, 159, 0.2);
+  animation: ringSpin 20s linear infinite;
+}
+
+@keyframes ringSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .wheel-pointer {
   position: absolute;
   top: -8px;
@@ -500,14 +729,30 @@ main {
   border-top: 28px solid var(--carrefour-red);
   z-index: 10;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+  animation: pointerBounce 1.5s ease-in-out infinite;
+}
+
+@keyframes pointerBounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(4px); }
 }
 
 #wheel-canvas {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  box-shadow: 0 8px 32px rgba(0, 78, 159, 0.25);
+  box-shadow: 0 8px 32px rgba(0, 78, 159, 0.25), 0 0 0 4px rgba(255,255,255,0.8);
   transition: transform 0.1s;
+}
+
+#wheel-canvas.is-idle {
+  animation: wheelIdle 8s ease-in-out infinite;
+}
+
+@keyframes wheelIdle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(3deg); }
+  75% { transform: rotate(-3deg); }
 }
 
 .wheel-note {
@@ -540,6 +785,15 @@ main {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 14px;
+  opacity: 0;
+  transform: translateX(-16px);
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.steps__list li.is-visible {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .step-num {
@@ -554,6 +808,11 @@ main {
   font-weight: 700;
   font-size: 0.85rem;
   flex-shrink: 0;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.steps__list li:hover .step-num {
+  transform: scale(1.15) rotate(8deg);
 }
 
 .steps__list strong {
@@ -590,7 +849,16 @@ main {
   align-items: center;
   justify-content: center;
   padding: 20px;
-  animation: fadeIn 0.3s ease;
+  animation: fadeIn 0.4s ease;
+}
+
+.modal-overlay:not(.hidden) {
+  animation: overlayIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes overlayIn {
+  from { opacity: 0; backdrop-filter: blur(0); }
+  to { opacity: 1; backdrop-filter: blur(6px); }
 }
 
 @keyframes fadeIn {
@@ -643,6 +911,12 @@ main {
   font-weight: 700;
   color: var(--carrefour-blue);
   margin-bottom: 8px;
+  animation: prizeReveal 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+}
+
+@keyframes prizeReveal {
+  from { opacity: 0; transform: scale(0.5); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 .modal__desc {
@@ -661,6 +935,12 @@ main {
   border-radius: var(--radius-sm);
   padding: 12px 16px;
   margin-bottom: 20px;
+  animation: codePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s both;
+}
+
+@keyframes codePop {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .modal__code-label {
