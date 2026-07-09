@@ -1,6 +1,6 @@
 // ─── Config ───────────────────────────────────────────────────────────────────
-// Replace with your actual WhatsApp group invite link
-const WHATSAPP_GROUP_URL = 'https://chat.whatsapp.com/YOUR_GROUP_INVITE_CODE';
+// WhatsApp group invite — Janta.ke Online
+const WHATSAPP_GROUP_URL = 'https://chat.whatsapp.com/HOpi8deLBgKK9Fvgg7jPK4';
 
 const DEALS = [
   {
@@ -332,10 +332,7 @@ function showWinModal(prize, code) {
   modalPrizeDesc.textContent = prize.desc;
   modalPrizeCode.textContent = code;
 
-  const message = encodeURIComponent(
-    `Hi Carrefour! 🎉\n\nI just won: *${prize.name}*\nMy code: *${code}*\nPhone: ${userPhone}\n\nI'd like to claim my reward and join the promo group!`
-  );
-  whatsappBtn.href = `${WHATSAPP_GROUP_URL}?text=${message}`;
+  whatsappBtn.href = WHATSAPP_GROUP_URL;
 
   winModal.classList.remove('hidden');
   launchConfetti();
