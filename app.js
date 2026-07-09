@@ -196,13 +196,14 @@ function bindEvents() {
 // ─── Phone validation ─────────────────────────────────────────────────────────
 function formatPhoneInput() {
   let val = phoneInput.value.replace(/\D/g, '');
-  if (val.length > 8) val = val.slice(0, 8);
+  if (val.startsWith('0')) val = val.slice(1);
+  if (val.length > 9) val = val.slice(0, 9);
 
-  if (val.length > 2) {
-    val = val.slice(0, 2) + ' ' + val.slice(2);
+  if (val.length > 3) {
+    val = val.slice(0, 3) + ' ' + val.slice(3);
   }
-  if (val.length > 6) {
-    val = val.slice(0, 6) + ' ' + val.slice(6);
+  if (val.length > 7) {
+    val = val.slice(0, 7) + ' ' + val.slice(7);
   }
 
   phoneInput.value = val;
@@ -210,9 +211,15 @@ function formatPhoneInput() {
   phoneHint.textContent = "We'll send your reward details via WhatsApp";
 }
 
+function normalizePhoneDigits(raw) {
+  let digits = raw.replace(/\D/g, '');
+  if (digits.startsWith('0')) digits = digits.slice(1);
+  return digits;
+}
+
 function validatePhone(raw) {
-  const digits = raw.replace(/\D/g, '');
-  return digits.length >= 7 && digits.length <= 8;
+  const digits = normalizePhoneDigits(raw);
+  return digits.length === 9 && /^[17]/.test(digits);
 }
 
 function handlePhoneSubmit(e) {
@@ -221,12 +228,14 @@ function handlePhoneSubmit(e) {
   const raw = phoneInput.value.trim();
   if (!validatePhone(raw)) {
     phoneHint.classList.add('error');
-    phoneHint.textContent = 'Please enter a valid phone number (7–8 digits)';
+    phoneHint.textContent = 'Please enter a valid Kenyan number (e.g. 712 345 678)';
     phoneInput.focus();
     return;
   }
 
-  userPhone = '+961 ' + raw;
+  const digits = normalizePhoneDigits(raw);
+  const formatted = digits.replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3');
+  userPhone = '+254 ' + formatted;
   userPhoneDisplay.textContent = userPhone;
 
   phoneForm.classList.add('hidden');
