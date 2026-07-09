@@ -1,6 +1,6 @@
 // ─── Config ───────────────────────────────────────────────────────────────────
-// WhatsApp group invite — Janta.ke Online
-const WHATSAPP_GROUP_URL = 'https://chat.whatsapp.com/HOpi8deLBgKK9Fvgg7jPK4';
+// WhatsApp group invite — JantaConnection
+const WHATSAPP_GROUP_URL = 'https://chat.whatsapp.com/GtaDYdVWGjJF8u9yJDkyVQ';
 
 const DEALS = [
   {
