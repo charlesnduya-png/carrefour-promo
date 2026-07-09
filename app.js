@@ -1,0 +1,376 @@
+// ─── Config ───────────────────────────────────────────────────────────────────
+// Replace with your actual WhatsApp group invite link
+const WHATSAPP_GROUP_URL = 'https://chat.whatsapp.com/YOUR_GROUP_INVITE_CODE';
+
+const DEALS = [
+  {
+    name: 'Fresh Milk 1L',
+    emoji: '🥛',
+    category: 'dairy',
+    price: 1.29,
+    oldPrice: 1.89,
+    discount: '-32%',
+  },
+  {
+    name: 'Chicken Breast 1kg',
+    emoji: '🍗',
+    category: 'meat',
+    price: 4.99,
+    oldPrice: 7.49,
+    discount: '-33%',
+  },
+  {
+    name: 'Mixed Vegetables',
+    emoji: '🥦',
+    category: 'produce',
+    price: 2.49,
+    oldPrice: 3.99,
+    discount: '-38%',
+  },
+  {
+    name: 'Potato Chips 200g',
+    emoji: '🍟',
+    category: 'snacks',
+    price: 0.99,
+    oldPrice: 1.79,
+    discount: '-45%',
+  },
+  {
+    name: 'Olive Oil 500ml',
+    emoji: '🫒',
+    category: 'snacks',
+    price: 3.49,
+    oldPrice: 5.29,
+    discount: '-34%',
+  },
+  {
+    name: 'Fresh Bread Loaf',
+    emoji: '🍞',
+    category: 'dairy',
+    price: 0.79,
+    oldPrice: 1.19,
+    discount: '-34%',
+  },
+];
+
+const PRIZES = [
+  { name: '20% OFF Voucher', desc: 'On your next purchase over $30', weight: 25, color: '#004e9f' },
+  { name: 'Free Coffee', desc: 'At any Carrefour café', weight: 20, color: '#e5002b' },
+  { name: '$5 Gift Card', desc: 'Redeemable in-store today', weight: 15, color: '#f5a623' },
+  { name: 'Free Bag', desc: 'Eco-friendly reusable tote', weight: 15, color: '#25d366' },
+  { name: '10% OFF Groceries', desc: 'Valid on all fresh produce', weight: 15, color: '#7c3aed' },
+  { name: 'Mystery Box', desc: 'Surprise items worth up to $15', weight: 10, color: '#ec4899' },
+];
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let userPhone = '';
+let hasSpun = false;
+let isSpinning = false;
+let currentRotation = 0;
+let wonPrize = null;
+
+// ─── DOM ──────────────────────────────────────────────────────────────────────
+const dealsGrid = document.getElementById('deals-grid');
+const phoneForm = document.getElementById('phone-form');
+const phoneInput = document.getElementById('phone');
+const phoneHint = document.getElementById('phone-hint');
+const wheelArea = document.getElementById('wheel-area');
+const userPhoneDisplay = document.getElementById('user-phone-display');
+const wheelCanvas = document.getElementById('wheel-canvas');
+const spinBtn = document.getElementById('spin-btn');
+const winModal = document.getElementById('win-modal');
+const modalPrizeName = document.getElementById('modal-prize-name');
+const modalPrizeDesc = document.getElementById('modal-prize-desc');
+const modalPrizeCode = document.getElementById('modal-prize-code');
+const whatsappBtn = document.getElementById('whatsapp-btn');
+const closeModalBtn = document.getElementById('close-modal-btn');
+const copyCodeBtn = document.getElementById('copy-code-btn');
+const winnersCount = document.getElementById('winners-count');
+const confettiEl = document.getElementById('confetti');
+
+const ctx = wheelCanvas.getContext('2d');
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+function init() {
+  renderDeals();
+  drawWheel();
+  animateWinnersCount();
+  bindEvents();
+}
+
+function renderDeals() {
+  dealsGrid.innerHTML = DEALS.map((deal) => `
+    <article class="deal-card">
+      <div class="deal-card__img deal-card__img--${deal.category}">
+        <span aria-hidden="true">${deal.emoji}</span>
+        <span class="deal-card__badge">${deal.discount}</span>
+      </div>
+      <div class="deal-card__body">
+        <div class="deal-card__name">${deal.name}</div>
+        <div class="deal-card__prices">
+          <span class="deal-card__price">$${deal.price.toFixed(2)}</span>
+          <span class="deal-card__old">$${deal.oldPrice.toFixed(2)}</span>
+        </div>
+      </div>
+    </article>
+  `).join('');
+}
+
+function drawWheel() {
+  const size = wheelCanvas.width;
+  const center = size / 2;
+  const radius = center - 4;
+  const totalWeight = PRIZES.reduce((s, p) => s + p.weight, 0);
+  let startAngle = -Math.PI / 2;
+
+  ctx.clearRect(0, 0, size, size);
+
+  PRIZES.forEach((prize, i) => {
+    const sliceAngle = (prize.weight / totalWeight) * 2 * Math.PI;
+    const endAngle = startAngle + sliceAngle;
+
+    ctx.beginPath();
+    ctx.moveTo(center, center);
+    ctx.arc(center, center, radius, startAngle, endAngle);
+    ctx.closePath();
+    ctx.fillStyle = i % 2 === 0 ? prize.color : lightenColor(prize.color, 30);
+    ctx.fill();
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.save();
+    ctx.translate(center, center);
+    ctx.rotate(startAngle + sliceAngle / 2);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 11px DM Sans, sans-serif';
+    ctx.shadowColor = 'rgba(0,0,0,0.3)';
+    ctx.shadowBlur = 2;
+    const label = prize.name.length > 14 ? prize.name.slice(0, 12) + '…' : prize.name;
+    ctx.fillText(label, radius - 12, 4);
+    ctx.restore();
+
+    startAngle = endAngle;
+  });
+
+  // Center circle
+  ctx.beginPath();
+  ctx.arc(center, center, 28, 0, 2 * Math.PI);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+  ctx.strokeStyle = '#004e9f';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  ctx.fillStyle = '#004e9f';
+  ctx.font = 'bold 13px DM Sans, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('SPIN', center, center);
+}
+
+function lightenColor(hex, percent) {
+  const num = parseInt(hex.replace('#', ''), 16);
+  const r = Math.min(255, (num >> 16) + percent);
+  const g = Math.min(255, ((num >> 8) & 0xff) + percent);
+  const b = Math.min(255, (num & 0xff) + percent);
+  return `rgb(${r},${g},${b})`;
+}
+
+function bindEvents() {
+  phoneForm.addEventListener('submit', handlePhoneSubmit);
+  phoneInput.addEventListener('input', formatPhoneInput);
+  spinBtn.addEventListener('click', handleSpin);
+  closeModalBtn.addEventListener('click', closeModal);
+  copyCodeBtn.addEventListener('click', copyCode);
+  winModal.addEventListener('click', (e) => {
+    if (e.target === winModal) closeModal();
+  });
+}
+
+// ─── Phone validation ─────────────────────────────────────────────────────────
+function formatPhoneInput() {
+  let val = phoneInput.value.replace(/\D/g, '');
+  if (val.length > 8) val = val.slice(0, 8);
+
+  if (val.length > 2) {
+    val = val.slice(0, 2) + ' ' + val.slice(2);
+  }
+  if (val.length > 6) {
+    val = val.slice(0, 6) + ' ' + val.slice(6);
+  }
+
+  phoneInput.value = val;
+  phoneHint.classList.remove('error');
+  phoneHint.textContent = "We'll send your reward details via WhatsApp";
+}
+
+function validatePhone(raw) {
+  const digits = raw.replace(/\D/g, '');
+  return digits.length >= 7 && digits.length <= 8;
+}
+
+function handlePhoneSubmit(e) {
+  e.preventDefault();
+
+  const raw = phoneInput.value.trim();
+  if (!validatePhone(raw)) {
+    phoneHint.classList.add('error');
+    phoneHint.textContent = 'Please enter a valid phone number (7–8 digits)';
+    phoneInput.focus();
+    return;
+  }
+
+  userPhone = '+961 ' + raw;
+  userPhoneDisplay.textContent = userPhone;
+
+  phoneForm.classList.add('hidden');
+  wheelArea.classList.remove('hidden');
+
+  wheelArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// ─── Spin logic ───────────────────────────────────────────────────────────────
+function pickPrize() {
+  const total = PRIZES.reduce((s, p) => s + p.weight, 0);
+  let rand = Math.random() * total;
+  for (let i = 0; i < PRIZES.length; i++) {
+    rand -= PRIZES[i].weight;
+    if (rand <= 0) return { prize: PRIZES[i], index: i };
+  }
+  return { prize: PRIZES[PRIZES.length - 1], index: PRIZES.length - 1 };
+}
+
+function getSliceAngle(index) {
+  const totalWeight = PRIZES.reduce((s, p) => s + p.weight, 0);
+  let angle = 0;
+  for (let i = 0; i < index; i++) {
+    angle += (PRIZES[i].weight / totalWeight) * 360;
+  }
+  const sliceSize = (PRIZES[index].weight / totalWeight) * 360;
+  return angle + sliceSize / 2;
+}
+
+function handleSpin() {
+  if (isSpinning || hasSpun) return;
+
+  isSpinning = true;
+  spinBtn.disabled = true;
+  spinBtn.querySelector('.spin-btn__text').textContent = 'SPINNING...';
+
+  const { prize, index } = pickPrize();
+  wonPrize = prize;
+
+  const sliceCenter = getSliceAngle(index);
+  const spins = 5 + Math.random() * 3;
+  const targetRotation = currentRotation + spins * 360 + (360 - sliceCenter);
+
+  animateWheel(targetRotation, () => {
+    hasSpun = true;
+    isSpinning = false;
+    currentRotation = targetRotation % 360;
+
+    const code = generateCode();
+    showWinModal(prize, code);
+  });
+}
+
+function animateWheel(targetRotation, onComplete) {
+  const startRotation = currentRotation;
+  const duration = 4500;
+  const startTime = performance.now();
+
+  function easeOutCubic(t) {
+    return 1 - Math.pow(1 - t, 3);
+  }
+
+  function frame(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = easeOutCubic(progress);
+    const rotation = startRotation + (targetRotation - startRotation) * eased;
+
+    wheelCanvas.style.transform = `rotate(${rotation}deg)`;
+
+    if (progress < 1) {
+      requestAnimationFrame(frame);
+    } else {
+      currentRotation = targetRotation;
+      onComplete();
+    }
+  }
+
+  requestAnimationFrame(frame);
+}
+
+function generateCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = 'CARRE-';
+  for (let i = 0; i < 6; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return code;
+}
+
+// ─── Win modal ────────────────────────────────────────────────────────────────
+function showWinModal(prize, code) {
+  modalPrizeName.textContent = prize.name;
+  modalPrizeDesc.textContent = prize.desc;
+  modalPrizeCode.textContent = code;
+
+  const message = encodeURIComponent(
+    `Hi Carrefour! 🎉\n\nI just won: *${prize.name}*\nMy code: *${code}*\nPhone: ${userPhone}\n\nI'd like to claim my reward and join the promo group!`
+  );
+  whatsappBtn.href = `${WHATSAPP_GROUP_URL}?text=${message}`;
+
+  winModal.classList.remove('hidden');
+  launchConfetti();
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  winModal.classList.add('hidden');
+  document.body.style.overflow = '';
+  spinBtn.querySelector('.spin-btn__text').textContent = 'ALREADY SPUN ✓';
+}
+
+function copyCode() {
+  navigator.clipboard.writeText(modalPrizeCode.textContent).then(() => {
+    copyCodeBtn.innerHTML = '✓';
+    setTimeout(() => {
+      copyCodeBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke="currentColor" stroke-width="2"/></svg>`;
+    }, 1500);
+  });
+}
+
+function launchConfetti() {
+  confettiEl.innerHTML = '';
+  const colors = ['#004e9f', '#e5002b', '#f5a623', '#25d366', '#7c3aed', '#ec4899'];
+
+  for (let i = 0; i < 50; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + '%';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDelay = Math.random() * 0.8 + 's';
+    piece.style.animationDuration = (2 + Math.random() * 1.5) + 's';
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    piece.style.width = (6 + Math.random() * 8) + 'px';
+    piece.style.height = (6 + Math.random() * 8) + 'px';
+    confettiEl.appendChild(piece);
+  }
+}
+
+function animateWinnersCount() {
+  const base = 2800 + Math.floor(Math.random() * 100);
+  let current = base;
+  winnersCount.textContent = current.toLocaleString();
+
+  setInterval(() => {
+    current += Math.floor(Math.random() * 3) + 1;
+    winnersCount.textContent = current.toLocaleString();
+  }, 8000);
+}
+
+init();
