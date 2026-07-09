@@ -83,7 +83,6 @@ const modalPrizeName = document.getElementById('modal-prize-name');
 const modalPrizeDesc = document.getElementById('modal-prize-desc');
 const modalPrizeCode = document.getElementById('modal-prize-code');
 const whatsappBtn = document.getElementById('whatsapp-btn');
-const closeModalBtn = document.getElementById('close-modal-btn');
 const copyCodeBtn = document.getElementById('copy-code-btn');
 const winnersCount = document.getElementById('winners-count');
 const confettiEl = document.getElementById('confetti');
@@ -224,11 +223,7 @@ function bindEvents() {
   phoneForm.addEventListener('submit', handlePhoneSubmit);
   phoneInput.addEventListener('input', formatPhoneInput);
   spinBtn.addEventListener('click', handleSpin);
-  closeModalBtn.addEventListener('click', closeModal);
   copyCodeBtn.addEventListener('click', copyCode);
-  winModal.addEventListener('click', (e) => {
-    if (e.target === winModal) closeModal();
-  });
 }
 
 // ─── Phone validation ─────────────────────────────────────────────────────────
@@ -382,11 +377,6 @@ function showWinModal(prize, code) {
   winModal.classList.remove('hidden');
   launchConfetti();
   document.body.style.overflow = 'hidden';
-}
-
-function closeModal() {
-  winModal.classList.add('hidden');
-  document.body.style.overflow = '';
   spinBtn.querySelector('.spin-btn__text').textContent = 'ALREADY SPUN ✓';
 }
 
