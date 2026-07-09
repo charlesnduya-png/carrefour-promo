@@ -7,59 +7,59 @@ const DEALS = [
     name: 'Fresh Milk 1L',
     emoji: '🥛',
     category: 'dairy',
-    price: 1.29,
-    oldPrice: 1.89,
+    price: 129,
+    oldPrice: 189,
     discount: '-32%',
   },
   {
     name: 'Chicken Breast 1kg',
     emoji: '🍗',
     category: 'meat',
-    price: 4.99,
-    oldPrice: 7.49,
-    discount: '-33%',
+    price: 649,
+    oldPrice: 949,
+    discount: '-32%',
   },
   {
     name: 'Mixed Vegetables',
     emoji: '🥦',
     category: 'produce',
-    price: 2.49,
-    oldPrice: 3.99,
+    price: 249,
+    oldPrice: 399,
     discount: '-38%',
   },
   {
     name: 'Potato Chips 200g',
     emoji: '🍟',
     category: 'snacks',
-    price: 0.99,
-    oldPrice: 1.79,
+    price: 99,
+    oldPrice: 179,
     discount: '-45%',
   },
   {
     name: 'Olive Oil 500ml',
     emoji: '🫒',
     category: 'snacks',
-    price: 3.49,
-    oldPrice: 5.29,
+    price: 449,
+    oldPrice: 679,
     discount: '-34%',
   },
   {
     name: 'Fresh Bread Loaf',
     emoji: '🍞',
     category: 'dairy',
-    price: 0.79,
-    oldPrice: 1.19,
+    price: 79,
+    oldPrice: 119,
     discount: '-34%',
   },
 ];
 
 const PRIZES = [
-  { name: '20% OFF Voucher', desc: 'On your next purchase over $30', weight: 25, color: '#004e9f' },
+  { name: '20% OFF Voucher', desc: 'On your next purchase over KSh 3,000', weight: 25, color: '#004e9f' },
   { name: 'Free Coffee', desc: 'At any Carrefour café', weight: 20, color: '#e5002b' },
-  { name: '$5 Gift Card', desc: 'Redeemable in-store today', weight: 15, color: '#f5a623' },
+  { name: 'KSh 500 Gift Card', desc: 'Redeemable in-store today', weight: 15, color: '#f5a623' },
   { name: 'Free Bag', desc: 'Eco-friendly reusable tote', weight: 15, color: '#25d366' },
   { name: '10% OFF Groceries', desc: 'Valid on all fresh produce', weight: 15, color: '#7c3aed' },
-  { name: 'Mystery Box', desc: 'Surprise items worth up to $15', weight: 10, color: '#ec4899' },
+  { name: 'Mystery Box', desc: 'Surprise items worth up to KSh 1,500', weight: 10, color: '#ec4899' },
 ];
 
 // ─── State ────────────────────────────────────────────────────────────────────
@@ -98,6 +98,10 @@ function init() {
   bindEvents();
 }
 
+function formatPrice(amount) {
+  return `KSh ${amount.toLocaleString('en-KE')}`;
+}
+
 function renderDeals() {
   dealsGrid.innerHTML = DEALS.map((deal) => `
     <article class="deal-card">
@@ -108,8 +112,8 @@ function renderDeals() {
       <div class="deal-card__body">
         <div class="deal-card__name">${deal.name}</div>
         <div class="deal-card__prices">
-          <span class="deal-card__price">$${deal.price.toFixed(2)}</span>
-          <span class="deal-card__old">$${deal.oldPrice.toFixed(2)}</span>
+          <span class="deal-card__price">${formatPrice(deal.price)}</span>
+          <span class="deal-card__old">${formatPrice(deal.oldPrice)}</span>
         </div>
       </div>
     </article>
